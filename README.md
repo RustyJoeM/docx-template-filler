@@ -40,16 +40,12 @@ and, optionally (assuming you will not want to build the application again/repea
 
 ## implementation details
 
-I have written this application in [Rust][rust] programming language, primarily as an attempt to learn / get to know the language.
-
-It uses several Rust crates (see `Cargo.toml` file) for it's work-flow, that allowed to do it's work fairly easily/quickly.
+I have written this application in [Rust][rust] programming language, primarily as an attempt to learn / get to know the language. It uses several Rust crates (see `Cargo.toml` file) for its work-flow, that allowed to do its work fairly easily/quickly.
 
 Few points of interest:
 
 - UI is created using the [native-windows-gui][nwg] crate, and thus builds only for windows target platform
-
 - support for UI language is done using [fluent-templates][ft] create, and does only very basic translations, thus might sound a bit rough in specific languages
-
 - app loads the whole DOCX template file into memory, and thus might not be suitable to work with huge DOCX files that have huge file-size / page count / embedded graphical/audio data etc.
 
 # thank you
