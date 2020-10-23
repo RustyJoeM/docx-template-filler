@@ -1,0 +1,4 @@
+- move manual / usage / help related information into the application?
+- safeguard for output file relative path trying to go places via dots/slashes?
+- explicit menu for load template, close template, help, languages?
+- add user use-case - skip some token filling if value not ready/available? fill only parts of tokens
