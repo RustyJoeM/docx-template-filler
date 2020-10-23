@@ -98,10 +98,12 @@ Try to experiment with the settings / input data to gain experience. In the end,
 
 ## docx-template-filler limitations
 
-currently, there are some usability restrictions on the application:
+currently, there are some usability restrictions in the application:
 
-- whole token text has to be a single DOCX document style
-
+- whole token text has to have a single DOCX document style<br/>(this translates to how docx-template-filler works internally to find tokens in document)<br/>
+Please make sure, for very token in your document, to:
+    - select/highlight the token text in your DOCX file
+    - press CTRL+space combination on the keyboard
+        - or assign any Word style to the selection
+    - re-save the document
 - you have to provide values for ALL of the tokens identified in file
-- 
-- TODO
