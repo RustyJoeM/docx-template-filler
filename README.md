@@ -60,5 +60,5 @@ from the Rust beginner, to the people that helped out, clarified things, and res
 <!-- references -->
 [rust]: https://www.rust-lang.org/
 [forum]: https://users.rust-lang.org/
-[nwg]: https://gabdube.github.io/native-windows-gui/
+[nwg]: https://github.com/gabdube/native-windows-gui
 [ft]: https://github.com/XAMPPRocky/fluent-templates
