@@ -11,6 +11,8 @@ It does this in several steps:
 
 For details on usage of application, and an example, please see the [manual](manual.md).
 
+Currently supported languages in the application are: English (default), Czech, Russian.
+
 ## installation
 
 Whole application consists of a single file: "`docx-template-filler.exe`".
@@ -46,7 +48,7 @@ Few points of interest:
 
 - UI is created using the [native-windows-gui][nwg] crate, and thus builds only for windows target platform
 
-- support for UI language is dome using [fluent-templates][ft] create, and does only very basic translations, thus might sound a bit rough in specific languages
+- support for UI language is done using [fluent-templates][ft] create, and does only very basic translations, thus might sound a bit rough in specific languages
 
 - app loads the whole DOCX template file into memory, and thus might not be suitable to work with huge DOCX files that have huge file-size / page count / embedded graphical/audio data etc.
 
