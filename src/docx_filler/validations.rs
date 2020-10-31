@@ -60,7 +60,7 @@ pub fn validate_batch(
 ///
 /// Can return Docx::Validation on failure, with details in message.
 pub fn validate_tokens(tokens: &TokenPack) -> Result<(), DocxError> {
-    if tokens.len() < 1 {
+    if tokens.is_empty() {
         return Err(DocxError::Validation(lang::tr("valid-no-tokens")));
     }
     let counts = tokens_counts_map(tokens);

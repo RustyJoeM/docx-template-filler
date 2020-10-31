@@ -12,6 +12,8 @@ pub type TokenPack = Vec<String>;
 /// Alias for a set of values to be filled into placeholders.
 pub type ValuePack = Vec<String>;
 
+type DocxResult<T> = Result<T, DocxError>;
+
 /// Error returned on failure of some of the docx-filler methods.
 /// String representation should give details on what specifically went wrong.
 #[derive(Debug, thiserror::Error)]
@@ -55,7 +57,7 @@ impl DocxTemplate {
     ///
     /// Can return error if I/O problems are encountered during opening of the DOCX file.
     /// ZIP related errors can also be raised when reading the DOCX contents into memory.
-    pub fn open(input: &Path) -> Result<DocxTemplate, DocxError> {
+    pub fn open(input: &Path) -> DocxResult<DocxTemplate> {
         let mut file_map: FileMap = Default::default();
 
         let zip_file = File::open(input)?;
@@ -83,13 +85,8 @@ impl DocxTemplate {
     ///
     /// Can return errors if no DOCX is loaded when attempting this,
     /// or when parsing of tokens fail.
-    pub fn template_tokens(&self) -> Result<TokenPack, DocxError> {
-        let document = match self.document_contents() {
-            Some(doc) => doc,
-            None => {
-                return Err(DocxError::Processing(lang::tr("ui-docx-no-template")));
-            }
-        };
+    pub fn template_tokens(&self) -> DocxResult<TokenPack> {
+        let document = self.document_contents().ok_or(DocxError::Processing(lang::tr("ui-docx-no-template")))?;
 
         let re = match Regex::new(r"\{\{.*?\}\}") {
             Ok(re) => re,
@@ -117,10 +114,7 @@ impl DocxTemplate {
     /// Get the whole textual content of the DOCX template document.
     fn document_contents(&self) -> Option<String> {
         let document = self.file_data.get(&self.target_xml);
-        if let Some(content) = document {
-            return Some(content.to_string());
-        };
-        None
+        document.and_then(|content| Some(content.to_string()))
     }
 
     /// Generates a single DOCX file from the loaded template.
@@ -141,7 +135,7 @@ impl DocxTemplate {
         tokens: &TokenPack,
         values: &ValuePack,
         output_pattern: &str,
-    ) -> Result<(), DocxError> {
+    ) -> DocxResult<()> {
         validations::validate_single(tokens, values, output_pattern)?;
         self.data_to_docx(tokens, values, output_pattern)?;
         Ok(())
@@ -163,12 +157,12 @@ impl DocxTemplate {
         tokens: &TokenPack,
         values: &ValuePack,
         output_pattern: &str,
-    ) -> Result<(), DocxError> {
+    ) -> DocxResult<()> {
         let out_str = replace_tokens(output_pattern, tokens, values);
 
         let out_path = PathBuf::from(&out_str);
         if out_path.exists() {
-            let args: lang::TrArgVec = vec![("filename".to_string(), out_str.to_string())];
+            let args: lang::TrArgVec = vec![("filename".to_string(), out_str)];
             let msg = lang::tr_with_args("docx-filler-fail-overwrite", &args);
             return Err(DocxError::Processing(msg));
         }
@@ -185,12 +179,7 @@ impl DocxTemplate {
             zip.write(file_content.as_bytes())?;
         }
 
-        let orig_document = match self.document_contents() {
-            Some(doc) => doc,
-            None => {
-                return Err(DocxError::Processing(lang::tr("docx-filler-fail-load")));
-            }
-        };
+        let orig_document = self.document_contents().ok_or(DocxError::Processing(lang::tr("docx-filler-fail-load")))?;
 
         let updated_document = replace_tokens(&orig_document, tokens, values);
         zip.start_file(&self.target_xml, options)?;
@@ -217,7 +206,7 @@ impl DocxTemplate {
         text: &str, // TODO change into some line iterator?
         separator: &str,
         output_pattern: &str,
-    ) -> Result<(), DocxError> {
+    ) -> DocxResult<()> {
         validations::validate_batch(&tokens, &text, &separator, &output_pattern)?;
 
         for line in text.lines() {

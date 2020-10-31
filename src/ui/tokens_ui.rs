@@ -97,13 +97,11 @@ fn clear_objects_from_layout<W>(keeper: &RefCell<Vec<W>>, layout: &nwg::FlexboxL
 where
     for<'local> &'local W: Into<nwg::ControlHandle>,
 {
-    // let children = keeper.borrow();
     for d in keeper.borrow().iter() {
         if layout.has_child(d) {
             layout.remove_child(d);
         }
     }
-    // drop(children);
     keeper.replace(Default::default());
 }
 
