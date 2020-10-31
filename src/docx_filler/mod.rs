@@ -86,7 +86,9 @@ impl DocxTemplate {
     /// Can return errors if no DOCX is loaded when attempting this,
     /// or when parsing of tokens fail.
     pub fn template_tokens(&self) -> DocxResult<TokenPack> {
-        let document = self.document_contents().ok_or(DocxError::Processing(lang::tr("ui-docx-no-template")))?;
+        let document = self
+            .document_contents()
+            .ok_or(DocxError::Processing(lang::tr("ui-docx-no-template")))?;
 
         let re = match Regex::new(r"\{\{.*?\}\}") {
             Ok(re) => re,
@@ -179,7 +181,9 @@ impl DocxTemplate {
             zip.write(file_content.as_bytes())?;
         }
 
-        let orig_document = self.document_contents().ok_or(DocxError::Processing(lang::tr("docx-filler-fail-load")))?;
+        let orig_document = self
+            .document_contents()
+            .ok_or(DocxError::Processing(lang::tr("docx-filler-fail-load")))?;
 
         let updated_document = replace_tokens(&orig_document, tokens, values);
         zip.start_file(&self.target_xml, options)?;
