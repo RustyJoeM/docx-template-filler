@@ -1,0 +1,2 @@
+# localization files need LF for prevent parse error
+*.ftl text eol=lf
