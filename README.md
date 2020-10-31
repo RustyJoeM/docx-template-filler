@@ -1,6 +1,6 @@
 # docx-template-filler
 
-This small application is intended as a simple office/administration helper. It should help when one needs to create number of DOCX documents from a common template. This usually corresponds to changing only little bits of each output document - like person name, address, phone number, etc. While doing manually is possible, it can be tiring process. *docx-template-filler* should help and speed up this task.
+This small application is intended as a simple office/administration tool. It should help when one needs to create number of DOCX documents from a common template. This usually corresponds to changing only small bits for every output document - e.g. person name, address, phone number, etc. While doing this manually is possible, it can be tiring process. *docx-template-filler* should help and speed up this task.
 
 It does this in several steps:
 
@@ -17,9 +17,9 @@ Currently supported languages in the application are: English (default), Czech, 
 
 Whole application consists of a single file: "`docx-template-filler.exe`".
 
-It does not need to be installed, or does not have any external dependencies. It should run on "any" recent windows, and does not have any external dependencies.
+It should run on "any" recent windows. It does not need to be installed, and does not have any external dependencies.
 
-I recommend to put the application executable into some standalone folder. It uses the folder where it is located as a default output folder. This means it places the all generated DOCX files here.
+I recommend to put the application executable into some standalone folder, as it places all the generated DOCX files next to where it is located.
 
 ## build - "docx-template-filler.exe"
 
