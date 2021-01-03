@@ -1,2 +1,4 @@
 # localization files need LF to prevent parse error
 *.ftl text eol=lf
+# https://github.com/projectfluent/fluent
+*.ftl linguist-language=Fluent-Syntax
