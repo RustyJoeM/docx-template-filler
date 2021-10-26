@@ -37,7 +37,8 @@ impl TemplateUi {
         }
         if self.dialog.run(Some(window)) {
             if let Ok(file) = self.dialog.get_selected_item() {
-                return Some(file.to_string());
+                let s = file.to_str()?;
+                return Some(s.to_owned());
             }
         }
         None

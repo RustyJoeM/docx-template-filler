@@ -2,20 +2,20 @@
 name = "docx-template-filler"
 version = "0.1.0"
 authors = ["Jozef Miklos"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 
 # core deps used by filler
-regex = "1.4.1"
-thiserror="1.0.21"
-zip = "0.5.8"
+regex = "1.5.4"
+thiserror="1.0.30"
+zip = "0.5.13"
 
 # UI related deps
-native-windows-gui = "1.0.5"
-native-windows-derive = "1.0.2"
+native-windows-gui = "1.0.12"
+native-windows-derive = "1.0.4"
 
 # localization deps
 lazy_static = "1.4.0"
 unic-langid = "0.9.0"
-fluent-templates = "0.5.16"
+fluent-templates = "0.6.1"
