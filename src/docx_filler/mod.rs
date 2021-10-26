@@ -8,9 +8,11 @@ use std::{collections::HashMap, fs::File, path::PathBuf};
 
 /// Alias for a set of tokens (placeholders).
 pub type TokenPack = Vec<String>;
+pub type TokenPackArg<'a> = &'a [String];
 
 /// Alias for a set of values to be filled into placeholders.
 pub type ValuePack = Vec<String>;
+pub type ValuePackArg<'a> = &'a [String];
 
 type DocxResult<T> = Result<T, DocxError>;
 
@@ -88,7 +90,7 @@ impl DocxTemplate {
     pub fn template_tokens(&self) -> DocxResult<TokenPack> {
         let document = self
             .document_contents()
-            .ok_or(DocxError::Processing(lang::tr("ui-docx-no-template")))?;
+            .ok_or_else(|| DocxError::Processing(lang::tr("ui-docx-no-template")))?;
 
         let re = match Regex::new(r"\{\{.*?\}\}") {
             Ok(re) => re,
@@ -116,7 +118,7 @@ impl DocxTemplate {
     /// Get the whole textual content of the DOCX template document.
     fn document_contents(&self) -> Option<String> {
         let document = self.file_data.get(&self.target_xml);
-        document.and_then(|content| Some(content.to_string()))
+        document.map(|content| content.to_string())
     }
 
     /// Generates a single DOCX file from the loaded template.
@@ -134,8 +136,8 @@ impl DocxTemplate {
     /// Can return errors on inconsistent input data or other internal problems (see error message for details).
     pub fn build_docx(
         &self,
-        tokens: &TokenPack,
-        values: &ValuePack,
+        tokens: TokenPackArg,
+        values: ValuePackArg,
         output_pattern: &str,
     ) -> DocxResult<()> {
         validations::validate_single(tokens, values, output_pattern)?;
@@ -156,8 +158,8 @@ impl DocxTemplate {
     /// Can return errors on inconsistent input data or other internal problems (see error message for details).
     fn data_to_docx(
         &self,
-        tokens: &TokenPack,
-        values: &ValuePack,
+        tokens: TokenPackArg,
+        values: ValuePackArg,
         output_pattern: &str,
     ) -> DocxResult<()> {
         let out_str = replace_tokens(output_pattern, tokens, values);
@@ -178,16 +180,16 @@ impl DocxTemplate {
 
         for (file_name, file_content) in self.file_data.iter() {
             zip.start_file(file_name, options)?;
-            zip.write(file_content.as_bytes())?;
+            zip.write_all(file_content.as_bytes())?;
         }
 
         let orig_document = self
             .document_contents()
-            .ok_or(DocxError::Processing(lang::tr("docx-filler-fail-load")))?;
+            .ok_or_else(|| DocxError::Processing(lang::tr("docx-filler-fail-load")))?;
 
         let updated_document = replace_tokens(&orig_document, tokens, values);
         zip.start_file(&self.target_xml, options)?;
-        zip.write(updated_document.as_bytes())?;
+        zip.write_all(updated_document.as_bytes())?;
         zip.finish()?;
 
         Ok(())
@@ -206,16 +208,16 @@ impl DocxTemplate {
     /// Can return error on failure, with details in the error message.
     pub fn build_docx_batch(
         &self,
-        tokens: &TokenPack,
+        tokens: TokenPackArg,
         text: &str, // TODO change into some line iterator?
         separator: &str,
         output_pattern: &str,
     ) -> DocxResult<()> {
-        validations::validate_batch(&tokens, &text, &separator, &output_pattern)?;
+        validations::validate_batch(tokens, text, separator, output_pattern)?;
 
         for line in text.lines() {
-            let values = string_to_values(line, &separator);
-            self.data_to_docx(&tokens, &values, &output_pattern)?;
+            let values = string_to_values(line, separator);
+            self.data_to_docx(tokens, &values, output_pattern)?;
         }
 
         Ok(())
@@ -223,7 +225,7 @@ impl DocxTemplate {
 }
 
 /// Fill in the input string with specified set of tokens and values.
-fn replace_tokens(input: &str, tokens: &TokenPack, values: &ValuePack) -> String {
+fn replace_tokens(input: &str, tokens: TokenPackArg, values: ValuePackArg) -> String {
     assert_eq!(tokens.len(), values.len());
     let mut output: String = input.to_string();
     for i in 0..tokens.len() {

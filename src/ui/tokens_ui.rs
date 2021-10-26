@@ -1,5 +1,5 @@
 use super::consts;
-use crate::docx_filler::TokenPack;
+use crate::docx_filler::{TokenPack, TokenPackArg};
 use crate::lang::tr;
 use nwd::NwgPartial;
 use nwg::stretch::geometry::Size;
@@ -23,11 +23,10 @@ pub struct TokensUi {
 impl TokensUi {
     pub fn get_selected_tokens(&self) -> TokenPack {
         let dds = self.dropdowns.borrow();
-        let tokens = dropdowns_to_tokens(&dds);
-        tokens
+        dropdowns_to_tokens(&dds)
     }
 
-    pub fn set_tokens_of_frame(&self, frame: &nwg::Frame, tokens: &TokenPack, sep_str: &str) {
+    pub fn set_tokens_of_frame(&self, frame: &nwg::Frame, tokens: TokenPackArg, sep_str: &str) {
         clear_objects_from_layout(&self.dropdowns, &self.layout);
         clear_objects_from_layout(&self.separators, &self.layout);
 
@@ -46,7 +45,7 @@ impl TokensUi {
             .text(sep_str)
             .h_align(HTextAlign::Center)
             .build(&mut new_sep)
-            .expect(&tr("ui-tokens-failed-sep-create"));
+            .unwrap_or_else(|_| panic!("{}", tr("ui-tokens-failed-sep-create")));
         let style = Style {
             size: Size {
                 width: Dimension::Points(20.0),
@@ -57,12 +56,12 @@ impl TokensUi {
         };
         self.layout
             .add_child(&new_sep, style)
-            .expect(&tr("ui-tokens-failed-sep-add"));
+            .unwrap_or_else(|_| panic!("{}", tr("ui-tokens-failed-sep-add")));
         self.separators.borrow_mut().push(new_sep);
     }
 
     // init & bind new token dropdown to running window
-    fn add_new_token(&self, frame: &nwg::Frame, values: &TokenPack, selected_index: usize) {
+    fn add_new_token(&self, frame: &nwg::Frame, values: TokenPackArg, selected_index: usize) {
         let new_coll = values.to_owned();
         let mut new_dd: nwg::ComboBox<String> = nwg::ComboBox::<String>::default();
 
@@ -71,7 +70,7 @@ impl TokensUi {
             .selected_index(Some(selected_index))
             .parent(frame)
             .build(&mut new_dd)
-            .expect(&tr("ui-tokens-failed-tok-create"));
+            .unwrap_or_else(|_| panic!("{}", tr("ui-tokens-failed-tok-create")));
 
         let style = Style {
             size: Size {
@@ -84,7 +83,7 @@ impl TokensUi {
         };
         self.layout
             .add_child(&new_dd, style)
-            .expect(&tr("ui-tokens-failed-tok-add"));
+            .unwrap_or_else(|_| panic!("{}", tr("ui-tokens-failed-tok-add")));
         self.dropdowns.borrow_mut().push(new_dd);
     }
 
@@ -105,7 +104,7 @@ where
     keeper.replace(Default::default());
 }
 
-fn dropdowns_to_tokens(dropdowns: &Vec<nwg::ComboBox<String>>) -> TokenPack {
+fn dropdowns_to_tokens(dropdowns: &[nwg::ComboBox<String>]) -> TokenPack {
     dropdowns
         .iter()
         .map(|dd| dd.selection_string())

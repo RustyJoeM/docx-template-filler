@@ -32,7 +32,7 @@ impl TemplateUi {
             if let Some(d) = d.to_str() {
                 self.dialog
                     .set_default_folder(d)
-                    .expect(&tr("ui-template-default-folder-fail"));
+                    .unwrap_or_else(|_| panic!("{}", tr("ui-template-default-folder-fail")));
             }
         }
         if self.dialog.run(Some(window)) {
@@ -45,7 +45,7 @@ impl TemplateUi {
     }
 
     pub fn set_current_docx(&self, file: &str) {
-        self.input.set_text(&file);
+        self.input.set_text(file);
     }
 
     pub fn reset_language(&self) {

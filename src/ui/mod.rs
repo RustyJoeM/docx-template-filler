@@ -17,17 +17,18 @@ use nwg::NativeUi;
 use std::{cell::RefCell, path::Path};
 
 pub fn init_app() {
-    nwg::init().expect(&lang::tr("ui-docx-fail-init"));
+    nwg::init().unwrap_or_else(|_| panic!("{}", lang::tr("ui-docx-fail-init")));
 
     let mut font = nwg::Font::default();
     nwg::Font::builder()
         .family("Times New Roman")
         .size(20)
         .build(&mut font)
-        .expect(&lang::tr("ui-docx-fail-build"));
+        .unwrap_or_else(|_| panic!("{}", lang::tr("ui-docx-fail-build")));
     nwg::Font::set_global_default(Some(font));
 
-    let _app = FillerApp::build_ui(Default::default()).expect(&lang::tr("ui-docx-fail-build"));
+    let _app = FillerApp::build_ui(Default::default())
+        .unwrap_or_else(|_| panic!("{}", lang::tr("ui-docx-fail-build")));
     nwg::dispatch_thread_events();
 }
 
@@ -93,10 +94,9 @@ impl FillerApp {
     /// Acts as alternative approach to open file (instead of "Load template" button).
     pub fn load_drop_files(&self, data: &nwg::EventData) {
         let drop = data.on_file_drop();
-        for file in drop.files() {
+        if let Some(file) = drop.files().into_iter().next() {
             // only first file processed - add multiple file handling if/when such feature implemented
             self.load_docx(&file);
-            break;
         }
     }
 
@@ -137,7 +137,7 @@ impl FillerApp {
             Err(err) => {
                 let err_msg = self.failed_load_str();
                 nwg::modal_info_message(&self.window, &err_msg, &err.to_string());
-                return;
+                // return;
             }
         }
     }

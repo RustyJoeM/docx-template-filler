@@ -84,12 +84,13 @@ pub type TrArg = (String, String);
 
 /// Vector of arguments to be used for translated message.
 pub type TrArgVec = Vec<TrArg>;
+pub type TrArgVecArg<'a> = &'a [TrArg];
 
 /// Final type for argument map used as direct input for fluent-templates.
 type ArgsMap<'m> = HashMap<String, FluentValue<'m>>;
 
 /// Returns translation of a text augmented with arguments, specified by current language setting and the input message id.
-pub fn tr_with_args(msg_id: &str, args: &TrArgVec) -> String {
+pub fn tr_with_args(msg_id: &str, args: TrArgVecArg) -> String {
     let arg_map = args_to_map(args);
     translate(msg_id, Some(&arg_map))
 }
@@ -98,7 +99,7 @@ pub fn tr_with_args(msg_id: &str, args: &TrArgVec) -> String {
 fn translate(text_id: &str, args: Option<&ArgsMap>) -> String {
     let lang_code = current_lang().to_lang_code();
     if let Some(li) = LANG_IDS.get(&lang_code) {
-        let translated = &*LOCALES.lookup_complete(&li, text_id, args);
+        let translated = &*LOCALES.lookup_complete(li, text_id, args);
         return translated.to_string();
     }
     text_id.to_string()
@@ -110,7 +111,7 @@ fn current_lang() -> SupportedLanguage {
 }
 
 /// Creates args map for the string translation.
-fn args_to_map<'a, T>(params: &'a Vec<(String, T)>) -> ArgsMap
+fn args_to_map<'a, T>(params: &'a [(String, T)]) -> ArgsMap
 where
     T: Into<FluentValue<'a>> + Clone,
 {

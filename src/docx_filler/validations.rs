@@ -1,5 +1,4 @@
-use super::DocxError;
-use super::{TokenPack, ValuePack};
+use super::{DocxError, TokenPackArg, ValuePack, ValuePackArg};
 use crate::lang;
 use std::collections::HashMap;
 
@@ -15,8 +14,8 @@ use std::collections::HashMap;
 ///
 /// Can return Docx::Validation on failure, with details in message.
 pub fn validate_single(
-    tokens: &TokenPack,
-    values: &ValuePack,
+    tokens: TokenPackArg,
+    values: ValuePackArg,
     output_pattern: &str,
 ) -> Result<(), DocxError> {
     validate_tokens(tokens)?;
@@ -39,7 +38,7 @@ pub fn validate_single(
 ///
 /// Can return Docx::Validation on failure, with details in message.
 pub fn validate_batch(
-    tokens: &TokenPack,
+    tokens: TokenPackArg,
     text: &str,
     separator: &str,
     output_pattern: &str,
@@ -59,14 +58,14 @@ pub fn validate_batch(
 /// # Errors
 ///
 /// Can return Docx::Validation on failure, with details in message.
-pub fn validate_tokens(tokens: &TokenPack) -> Result<(), DocxError> {
+pub fn validate_tokens(tokens: TokenPackArg) -> Result<(), DocxError> {
     if tokens.is_empty() {
         return Err(DocxError::Validation(lang::tr("valid-no-tokens")));
     }
     let counts = tokens_counts_map(tokens);
     for (token, count) in counts {
         if count > 1 {
-            let args: lang::TrArgVec = vec![("token".to_string(), token.to_string())];
+            let args: lang::TrArgVec = vec![("token".to_string(), token)];
             let msg = lang::tr_with_args("valid-token-duplicity", &args);
             return Err(DocxError::Validation(msg));
         }
@@ -75,7 +74,7 @@ pub fn validate_tokens(tokens: &TokenPack) -> Result<(), DocxError> {
 }
 
 /// Builds map with token values as keys, and number of times each token is used in the pack as a value.
-fn tokens_counts_map(tokens: &TokenPack) -> HashMap<String, u8> {
+fn tokens_counts_map(tokens: TokenPackArg) -> HashMap<String, u8> {
     let mut counts: HashMap<String, u8> = Default::default();
     for token in tokens.iter() {
         (*(counts.entry(token.to_string()).or_insert(0))) += 1;
@@ -97,7 +96,7 @@ fn tokens_counts_map(tokens: &TokenPack) -> HashMap<String, u8> {
 ///
 /// Can return Docx::Validation on failure, with details in message.
 fn validate_filename_multiline(
-    tokens: &TokenPack,
+    tokens: TokenPackArg,
     text: &str,
     separator: &str,
     output_pattern: &str,
@@ -111,7 +110,7 @@ fn validate_filename_multiline(
         validate_filename(&filename)?;
 
         if names.contains_key(&filename) {
-            let args: lang::TrArgVec = vec![("filename".to_string(), filename.to_string())];
+            let args: lang::TrArgVec = vec![("filename".to_string(), filename)];
             let msg = lang::tr_with_args("valid-same-output-filename", &args);
             return Err(DocxError::Validation(msg));
         }
@@ -122,7 +121,7 @@ fn validate_filename_multiline(
 }
 
 /// Validates the consistency of input sets of tokens and values.
-fn validate_values(tokens: &TokenPack, values: &ValuePack) -> Result<(), DocxError> {
+fn validate_values(tokens: TokenPackArg, values: ValuePackArg) -> Result<(), DocxError> {
     if values.is_empty() {
         return Err(DocxError::Validation(lang::tr("valid-missing-input")));
     }
@@ -161,7 +160,7 @@ fn validate_filename(filename: &str) -> Result<(), DocxError> {
 fn validate_values_multiline(
     text: &str,
     separator: &str,
-    tokens: &TokenPack,
+    tokens: TokenPackArg,
 ) -> Result<(), DocxError> {
     let mut i: usize = 1;
     if text.is_empty() {
